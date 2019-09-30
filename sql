@@ -92,19 +92,14 @@ GROUP BY
 -- CTE
 WITH rate_per_category AS (
 SELECT
-    rental_rate
-    ,category_id
+    *
 
 FROM
     film
 JOIN
     film_category as film_cat
 ON
-    film.film_id = film_cat.film_id
-
-GROUP BY
-    category_id 
-    ,rental_rate           )
+    film.film_id = film_cat.film_id)
 
 
 SELECT 
@@ -131,9 +126,9 @@ WHERE rating = (SELECT rating
 
 -- CTE
 
-WITH test AS (
+WITH pg13_amount AS (
         SELECT
-            rating AS pg13_amount
+            rating
 
         FROM
             film
@@ -147,13 +142,14 @@ WITH test AS (
         LIMIT 1      )
 
 SELECT
-    t
+    title
+    ,rating
 
 FROM 
-    test
+    film
 
 WHERE
-    rating = pg13_amount
+    rating = (SELECT * FROM pg13_amount)
 
 
 -- Return all purchases from the longest standing customer
@@ -169,14 +165,17 @@ WHERE customer_id = (SELECT customer_id
 
 WITH earliest_date AS  (
             SELECT
-                MIN(payment_date)
+                payment_date
                 ,customer_id
+                ,payment_id
 
             FROM
                 payment
 
             GROUP BY
-                customer_id
+                payment_date
+                ,customer_id
+                ,payment_id
 
             ORDER BY
                 MIN(payment_date)
@@ -185,7 +184,7 @@ WITH earliest_date AS  (
 
 SELECT
     customer_id
-    ,
+    ,payment_id
 
 FROM
     earliest_date
