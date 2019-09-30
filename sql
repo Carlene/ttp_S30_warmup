@@ -24,10 +24,11 @@ FROM (SELECT COUNT(inventory_id) as stock
 	  FROM inventory
 	  GROUP BY store_id) as store_stock;
 	  
+-- CTE
 
 WITH avg_stock AS (
 	SELECT 
-		COUNT(inventory_id) AS stock
+		COUNT(inventory_id) as stock
 	FROM 
 		inventory
 	GROUP BY 
@@ -37,7 +38,8 @@ SELECT
 	AVG(stock)
 
 FROM
-	avg_stock
+	avg_stock;
+
 
 -- Returns the average customer lifetime spending, for each staff member.
 -- HINT: you can work off the example
@@ -46,6 +48,31 @@ FROM (SELECT staff_id, SUM(amount) as total
 	  FROM payment 
 	  GROUP BY customer_id, staff_id) as customer_totals
 GROUP BY staff_id;
+
+
+-- CTE
+WITH customer_totals AS(
+	SELECT 
+		staff_id
+		,SUM(amount) as total
+
+	FROM 
+		payment 
+
+	GROUP BY 
+		customer_id
+		,staff_id		)
+
+SELECT
+	staff_id
+	,AVG(total)
+
+FROM
+	customer_totals
+
+GROUP BY
+	staff_id;
+
 
 -- Returns the average rental rate for each genre of film.
 SELECT AVG(rental_rate)
