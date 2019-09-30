@@ -24,6 +24,21 @@ FROM (SELECT COUNT(inventory_id) as stock
 	  FROM inventory
 	  GROUP BY store_id) as store_stock;
 	  
+
+WITH avg_stock AS (
+	SELECT 
+		COUNT(inventory_id) AS stock
+	FROM 
+		inventory
+	GROUP BY 
+		store_id  )
+
+SELECT 
+	AVG(stock)
+
+FROM
+	avg_stock
+
 -- Returns the average customer lifetime spending, for each staff member.
 -- HINT: you can work off the example
 SELECT staff_id, AVG(total)
