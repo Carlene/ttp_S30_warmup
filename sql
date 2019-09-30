@@ -21,79 +21,171 @@ WHERE total > 100;
 -- Returns the average of the amount of stock each store has in their inventory. 
 SELECT AVG(stock)
 FROM (SELECT COUNT(inventory_id) as stock
-	  FROM inventory
-	  GROUP BY store_id) as store_stock;
-	  
+      FROM inventory
+      GROUP BY store_id) as store_stock;
+      
 -- CTE
 
 WITH avg_stock AS (
-	SELECT 
-		COUNT(inventory_id) as stock
-	FROM 
-		inventory
-	GROUP BY 
-		store_id  )
+    SELECT 
+        COUNT(inventory_id) as stock
+    FROM 
+        inventory
+    GROUP BY 
+        store_id  )
 
 SELECT 
-	AVG(stock)
+    AVG(stock)
 
 FROM
-	avg_stock;
+    avg_stock;
 
 
 -- Returns the average customer lifetime spending, for each staff member.
 -- HINT: you can work off the example
 SELECT staff_id, AVG(total)
 FROM (SELECT staff_id, SUM(amount) as total
-	  FROM payment 
-	  GROUP BY customer_id, staff_id) as customer_totals
+      FROM payment 
+      GROUP BY customer_id, staff_id) as customer_totals
 GROUP BY staff_id;
 
 
 -- CTE
 WITH customer_totals AS(
-	SELECT 
-		staff_id
-		,SUM(amount) as total
+    SELECT 
+        staff_id
+        ,SUM(amount) as total
 
-	FROM 
-		payment 
+    FROM 
+        payment 
 
-	GROUP BY 
-		customer_id
-		,staff_id		)
+    GROUP BY 
+        customer_id
+        ,staff_id       )
 
 SELECT
-	staff_id
-	,AVG(total)
+    staff_id
+    ,AVG(total)
 
 FROM
-	customer_totals
+    customer_totals
 
 GROUP BY
-	staff_id;
+    staff_id;
 
 
 -- Returns the average rental rate for each genre of film.
-SELECT AVG(rental_rate)
-FROM film JOIN film_category ON film.film_id=film_category.film_id
-GROUP BY category_id;
+SELECT 
+    AVG(rental_rate), 
+    category_id
+FROM 
+    film 
+JOIN 
+    film_category 
+
+ON film.film_id=film_category.film_id
+GROUP BY 
+    category_id;
+
+
+
+-- CTE
+WITH rate_per_category AS (
+SELECT
+    rental_rate
+    ,category_id
+
+FROM
+    film
+JOIN
+    film_category as film_cat
+ON
+    film.film_id = film_cat.film_id
+
+GROUP BY
+    category_id 
+    ,rental_rate           )
+
+
+SELECT 
+    category_id
+    ,AVG(rental_rate)
+
+FROM
+    rate_per_category
+
+GROUP BY
+    category_id
+
+
 
 -- Return all films that have the rating that is biggest category 
 -- (ie. rating with the highest count of films)
 SELECT title, rating
 FROM film
 WHERE rating = (SELECT rating 
-				FROM film
-			   GROUP BY rating
-			   ORDER BY COUNT(*)
-			   LIMIT 1);
+                FROM film
+               GROUP BY rating
+               ORDER BY COUNT(*)
+               LIMIT 1);
+
+-- CTE
+
+WITH test AS (
+        SELECT
+            rating AS pg13_amount
+
+        FROM
+            film
+
+        GROUP BY
+            rating
+
+        ORDER BY
+            COUNT(rating) DESC
+
+        LIMIT 1      )
+
+SELECT
+    t
+
+FROM 
+    test
+
+WHERE
+    rating = pg13_amount
+
 
 -- Return all purchases from the longest standing customer
 -- (ie customer who has the earliest payment_date)
 SELECT * 
 FROM payment
 WHERE customer_id = (SELECT customer_id
-					  FROM payment
-					  ORDER BY payment_date
-					 LIMIT 1);
+                      FROM payment
+                      ORDER BY payment_date
+                     LIMIT 1);
+
+-- CTE
+
+WITH earliest_date AS  (
+            SELECT
+                MIN(payment_date)
+                ,customer_id
+
+            FROM
+                payment
+
+            GROUP BY
+                customer_id
+
+            ORDER BY
+                MIN(payment_date)
+
+            LIMIT 1)
+
+SELECT
+    customer_id
+    ,
+
+FROM
+    earliest_date
